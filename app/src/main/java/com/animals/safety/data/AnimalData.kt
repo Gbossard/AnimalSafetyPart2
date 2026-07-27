@@ -16,5 +16,9 @@ object AnimalData {
 
   fun findAnimalById(animalId: String) : Animal? =
     animals.firstOrNull { it.id.toString() == animalId }
+
+  fun removeAnimal(animal: Animal) {
+    animals.remove(animal)
+  }
 }
 

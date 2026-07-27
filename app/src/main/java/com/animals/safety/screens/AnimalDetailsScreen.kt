@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.FabPosition
@@ -21,9 +22,13 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -32,9 +37,11 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import com.animals.safety.R
 import com.animals.safety.data.Animal
+import com.animals.safety.data.AnimalData
 import com.animals.safety.data.Breed
 import com.animals.safety.ui.theme.AimantsDanimauxTheme
 import java.util.UUID
@@ -44,8 +51,10 @@ import java.util.UUID
 fun AnimalDetailsScreen(
   modifier: Modifier = Modifier,
   animal: Animal?,
-  onBackClick: () -> Unit
+  onBackClick: () -> Unit,
+  onDeleteClick: () -> Unit
 ) {
+  val openAlertDialog = rememberSaveable { mutableStateOf(false) }
   Scaffold(
     modifier = modifier,
     topBar = {
@@ -80,7 +89,7 @@ fun AnimalDetailsScreen(
         )
         ExtendedFloatingActionButton(
           onClick = {
-            //TODO: à compléter
+            openAlertDialog.value = !openAlertDialog.value
           },
           contentColor = Color.White,
           containerColor = Color.Red,
@@ -104,6 +113,20 @@ fun AnimalDetailsScreen(
         modifier = modifier.padding(contentPadding),
         animal = it,
       )
+
+      if (openAlertDialog.value) {
+        DeleteDialog(
+          onConfirmation = {
+            openAlertDialog.value = false
+            AnimalData.removeAnimal(animal)
+            onDeleteClick()
+          },
+          onDismissRequest = {
+            openAlertDialog.value = false
+          },
+          name = animal.name
+        )
+      }
     }
   }
 }
@@ -188,6 +211,46 @@ private fun Property(
   }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun DeleteDialog(
+  modifier: Modifier = Modifier,
+  onConfirmation: () -> Unit,
+  onDismissRequest: () -> Unit,
+  name: String
+) {
+  AlertDialog(
+    modifier = modifier,
+    icon = {
+      Icon(
+        painter = painterResource(R.drawable.ic_delete_24dp),
+        contentDescription = stringResource(R.string.description_button_delete)
+      )
+    },
+    title = {
+      Text(text = stringResource(R.string.permanently_delete))
+    },
+    text = {
+      Text(text = stringResource(R.string.description_delete, name))
+    },
+    onDismissRequest = onDismissRequest,
+    confirmButton = {
+      TextButton(
+        onClick = onConfirmation
+      ) {
+        Text(text = stringResource(R.string.description_button_delete))
+      }
+    },
+    dismissButton = {
+      TextButton(
+        onClick = onDismissRequest
+      ) {
+        Text(text = stringResource(R.string.description_button_cancel))
+      }
+    }
+  )
+}
+
 @Preview(showBackground = true)
 @Composable
 private fun PropertyPreview() {
@@ -198,6 +261,21 @@ private fun PropertyPreview() {
     )
   }
 }
+
+@PreviewLightDark
+@Composable
+private fun DeleteDialogPreview() {
+  AimantsDanimauxTheme(dynamicColor = false) {
+    Surface(modifier = Modifier.fillMaxSize()){
+      DeleteDialog(
+        onConfirmation = {},
+        onDismissRequest = {},
+        name = "Milou"
+      )
+    }
+  }
+}
+
 @Preview(showBackground = true)
 @Composable
 private fun AnimalDetailsPreview() {
