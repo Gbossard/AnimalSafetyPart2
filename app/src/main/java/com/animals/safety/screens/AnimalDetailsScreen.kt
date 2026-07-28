@@ -52,7 +52,8 @@ fun AnimalDetailsScreen(
   modifier: Modifier = Modifier,
   animal: Animal?,
   onBackClick: () -> Unit,
-  onDeleteClick: () -> Unit
+  onDeleteClick: () -> Unit,
+  onEditClick: () -> Unit
 ) {
   val openAlertDialog = rememberSaveable { mutableStateOf(false) }
   Scaffold(
@@ -63,9 +64,7 @@ fun AnimalDetailsScreen(
           Text(stringResource(id = R.string.details_fragment_label))
         },
         navigationIcon = {
-          IconButton(onClick = {
-            onBackClick()
-          }) {
+          IconButton(onClick = onBackClick) {
             Icon(
               painter = painterResource(R.drawable.ic_arrow_back_24dp),
               contentDescription = stringResource(id = R.string.contentDescription_go_back)
@@ -81,9 +80,7 @@ fun AnimalDetailsScreen(
         horizontalArrangement = Arrangement.SpaceEvenly
       ) {
         ExtendedFloatingActionButton(
-          onClick = {
-            //TODO: à compléter
-          },
+          onClick = onEditClick,
           icon = { Icon(painter = painterResource(R.drawable.ic_edit_24dp),stringResource(id = R.string.description_button_edit)) },
           text = { Text(text = stringResource(id = R.string.description_button_edit)) },
         )
